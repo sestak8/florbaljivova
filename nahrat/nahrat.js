@@ -109,7 +109,7 @@
     });
     return fetch(FUNCTION_URL, { method: 'POST', body: fd }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (body) {
-        if (!r.ok) { var e = new Error(body.error || 'http'); e.status = r.status; throw e; }
+        if (!r.ok) { var e = new Error(body.error || 'http'); e.status = r.status; e.detail = body.detail; throw e; }
         return body;
       });
     });
@@ -174,6 +174,7 @@
     }, function (err) {
       progress(0, 0);
       var msg = errorText(err);
+      if (err.detail) msg += ' [' + err.detail + ']';
       if (sent) msg = 'Nahráno ' + sent + ' fotek, pak nastala chyba: ' + msg;
       status(msg, 'error');
     }).then(function () { send.disabled = false; });

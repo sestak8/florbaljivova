@@ -267,6 +267,9 @@ Deno.serve(async (req) => {
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.code }, e.status, origin);
     console.error(e);
-    return json({ error: "server" }, 500, origin);
+    // Podrobnosti chyby jen pro testovací původ (EXTRA_ORIGIN), nikdy pro veřejný web
+    const testOrigin = Deno.env.get("EXTRA_ORIGIN");
+    const detail = testOrigin && origin === testOrigin ? String((e as Error)?.message ?? e).slice(0, 400) : undefined;
+    return json({ error: "server", ...(detail ? { detail } : {}) }, 500, origin);
   }
 });
