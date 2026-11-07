@@ -186,6 +186,8 @@ table.results th { color: var(--muted); font-weight: 500; }
 .album { margin-bottom: 48px; }
 .album h2 { margin-top: 0; }
 .album h2 small { color: var(--muted); font-weight: 500; font-size: 1rem; }
+.album .credit { color: var(--muted); font-size: 0.875rem; margin: 8px 0 0; }
+.muted { color: var(--muted); }
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

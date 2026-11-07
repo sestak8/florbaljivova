@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Nahrát fotky – Florbalový turnaj Jívová</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="nahrat.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="../index.html">Florbal <span>Jívová</span></a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap narrow">
+      <h1>Nahrát fotky</h1>
+      <p class="lead">Přidejte fotky z turnaje do galerie. Fotky se před odesláním automaticky zmenší a odstraní se z nich údaje o poloze.</p>
+
+      <p id="closed" class="box warn" hidden>Nahrávání fotek je teď vypnuté.</p>
+
+      <form id="form" hidden>
+        <label for="code">Kód pro nahrávání</label>
+        <input id="code" name="code" type="password" autocomplete="off" required>
+
+        <label for="year">Ročník</label>
+        <select id="year" name="year" required></select>
+
+        <label for="name">Vaše jméno <span class="opt">(nepovinné, uvede se „Foto: …“)</span></label>
+        <input id="name" name="name" type="text" maxlength="40" autocomplete="name">
+
+        <label for="files">Fotky</label>
+        <input id="files" name="files" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple required>
+        <p class="hint">Najednou můžete vybrat až 50 fotek.</p>
+
+        <div id="previews" class="previews"></div>
+
+        <p id="status" class="box" hidden></p>
+        <div id="bar" class="bar" hidden><span></span></div>
+
+        <button id="send" class="btn" type="submit">Nahrát fotky</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="nahrat.js"></script>
+</body>
+</html>

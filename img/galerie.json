@@ -1,0 +1,24 @@
+{
+  "years": [
+    {
+      "year": 2026,
+      "title": "19. ročník, 28. 3. 2026",
+      "photos": [
+        { "file": "01.jpg", "w": 400, "h": 600, "alt": "Hráč v neonově žlutém dresu s míčkem" },
+        { "file": "02.jpg", "w": 600, "h": 400, "alt": "Hráči a fanoušci u stolu s občerstvením" },
+        { "file": "03.jpg", "w": 600, "h": 400, "alt": "Souboj o míček" },
+        { "file": "04.jpg", "w": 600, "h": 400, "alt": "Herní situace v sále Kulturního domu" },
+        { "file": "05.jpg", "w": 600, "h": 400, "alt": "Hráč Sokola Jívová s číslem 12" },
+        { "file": "06.jpg", "w": 600, "h": 400, "alt": "Zápas smíšených týmů" },
+        { "file": "07.jpg", "w": 600, "h": 400, "alt": "Střela na branku" },
+        { "file": "08.jpg", "w": 600, "h": 400, "alt": "Rychlá akce v útoku" },
+        { "file": "09.jpg", "w": 600, "h": 400, "alt": "Herní situace" },
+        { "file": "10.jpg", "w": 600, "h": 400, "alt": "Podání rukou po zápase" },
+        { "file": "11.jpg", "w": 600, "h": 400, "alt": "Potlesk týmů při vyhlášení" },
+        { "file": "12.jpg", "w": 600, "h": 400, "alt": "Mladí hráči při vyhlášení výsledků" },
+        { "file": "13.jpg", "w": 600, "h": 400, "alt": "Společná fotka všech týmů" },
+        { "file": "14.jpg", "w": 600, "h": 400, "alt": "Tým s poháry" }
+      ]
+    }
+  ]
+}

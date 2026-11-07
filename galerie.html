@@ -30,32 +30,11 @@
       <p class="lead">Fotky z jednotlivých ročníků. Kliknutím fotku zvětšíte.</p>
 
       <!--
-        JAK PŘIDAT FOTKY
-        1. Fotky zmenšete skriptem tools/resize-photos.ps1 (vytvoří img/<rok>/NN.jpg a img/<rok>/nahledy/NN.jpg).
-        2. Pro každou fotku přidejte řádek:
-           <a href="img/2026/01.jpg"><img src="img/2026/nahledy/01.jpg" alt="Popis fotky" loading="lazy"></a>
-        Zvětšování po kliknutí funguje automaticky. Nejnovější ročník dávejte nahoru.
+        Seznam fotek je v img/galerie.json (ročníky, soubory, popisky).
+        Fotku z galerie odeberete smazáním jejího řádku v galerie.json.
       -->
-
-      <section class="album">
-        <h2>2026 <small>· 19. ročník, 28. 3. 2026</small></h2>
-        <div class="gallery">
-          <a href="img/2026/01.jpg"><img src="img/2026/nahledy/01.jpg" alt="Hráč v neonově žlutém dresu s míčkem" width="400" height="600" loading="lazy"></a>
-          <a href="img/2026/02.jpg"><img src="img/2026/nahledy/02.jpg" alt="Hráči a fanoušci u stolu s občerstvením" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/03.jpg"><img src="img/2026/nahledy/03.jpg" alt="Souboj o míček" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/04.jpg"><img src="img/2026/nahledy/04.jpg" alt="Herní situace v sále Kulturního domu" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/05.jpg"><img src="img/2026/nahledy/05.jpg" alt="Hráč Sokola Jívová s číslem 12" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/06.jpg"><img src="img/2026/nahledy/06.jpg" alt="Zápas smíšených týmů" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/07.jpg"><img src="img/2026/nahledy/07.jpg" alt="Střela na branku" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/08.jpg"><img src="img/2026/nahledy/08.jpg" alt="Rychlá akce v útoku" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/09.jpg"><img src="img/2026/nahledy/09.jpg" alt="Herní situace" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/10.jpg"><img src="img/2026/nahledy/10.jpg" alt="Podání rukou po zápase" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/11.jpg"><img src="img/2026/nahledy/11.jpg" alt="Potlesk týmů při vyhlášení" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/12.jpg"><img src="img/2026/nahledy/12.jpg" alt="Mladí hráči při vyhlášení výsledků" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/13.jpg"><img src="img/2026/nahledy/13.jpg" alt="Společná fotka všech týmů" width="600" height="400" loading="lazy"></a>
-          <a href="img/2026/14.jpg"><img src="img/2026/nahledy/14.jpg" alt="Tým s poháry" width="600" height="400" loading="lazy"></a>
-        </div>
-      </section>
+      <div id="albums"><p class="muted">Načítám fotky…</p></div>
+      <noscript><p>Pro zobrazení galerie je potřeba zapnutý JavaScript.</p></noscript>
     </div>
   </main>
 
@@ -74,15 +53,51 @@
   </footer>
 
   <script>
-    // Jednoduchá prohlížečka fotek
     (function () {
-      const links = Array.from(document.querySelectorAll('.gallery a'));
+      const albums = document.getElementById('albums');
+
+      function el(tag, attrs, children) {
+        const e = document.createElement(tag);
+        for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+        (children || []).forEach(c => e.append(c));
+        return e;
+      }
+
+      // Vykreslení alb ze seznamu fotek
+      fetch('img/galerie.json', { cache: 'no-cache' })
+        .then(r => r.json())
+        .then(data => {
+          albums.textContent = '';
+          const years = (data.years || []).filter(y => y.photos && y.photos.length)
+            .sort((a, b) => b.year - a.year);
+          if (!years.length) { albums.append(el('p', { class: 'muted' }, ['Zatím tu nejsou žádné fotky.'])); return; }
+
+          years.forEach(y => {
+            const heading = el('h2', {}, [String(y.year)]);
+            if (y.title) heading.append(' ', el('small', {}, ['· ' + y.title]));
+            const grid = el('div', { class: 'gallery' });
+            y.photos.forEach(p => {
+              grid.append(el('a', { href: `img/${y.year}/${p.file}` }, [
+                el('img', { src: `img/${y.year}/nahledy/${p.file}`, alt: p.alt || `Fotka z roku ${y.year}`,
+                            width: p.w || 600, height: p.h || 400, loading: 'lazy' })
+              ]));
+            });
+            const section = el('section', { class: 'album' }, [heading, grid]);
+            const authors = [...new Set(y.photos.map(p => p.by).filter(Boolean))];
+            if (authors.length) section.append(el('p', { class: 'credit' }, ['Foto: ' + authors.join(', ')]));
+            albums.append(section);
+          });
+        })
+        .catch(() => { albums.textContent = 'Fotky se nepodařilo načíst. Zkuste stránku obnovit.'; });
+
+      // Jednoduchá prohlížečka fotek
       const box = document.getElementById('lightbox');
       const img = box.querySelector('img');
-      let i = 0;
+      let links = [], i = 0;
 
       function show(n) {
         i = (n + links.length) % links.length;
+        img.removeAttribute('src');
         img.src = links[i].href;
         img.alt = links[i].querySelector('img')?.alt || '';
         box.classList.add('open');
@@ -93,7 +108,13 @@
         box.setAttribute('aria-hidden', 'true');
       }
 
-      links.forEach((a, n) => a.addEventListener('click', e => { e.preventDefault(); show(n); }));
+      albums.addEventListener('click', e => {
+        const a = e.target.closest('.gallery a');
+        if (!a) return;
+        e.preventDefault();
+        links = Array.from(albums.querySelectorAll('.gallery a'));
+        show(links.indexOf(a));
+      });
       box.querySelector('.close').addEventListener('click', close);
       box.querySelector('.prev').addEventListener('click', () => show(i - 1));
       box.querySelector('.next').addEventListener('click', () => show(i + 1));
