@@ -87,61 +87,6 @@
           "w": 600,
           "h": 400,
           "alt": "Tým s poháry"
-        },
-        {
-          "file": "15.jpg",
-          "w": 450,
-          "h": 600,
-          "alt": "Fotka z turnaje 2026 (foto: Jirka)",
-          "by": "Jirka"
-        },
-        {
-          "file": "16.jpg",
-          "w": 600,
-          "h": 450,
-          "alt": "Fotka z turnaje 2026 (foto: Jirka)",
-          "by": "Jirka"
-        },
-        {
-          "file": "17.jpg",
-          "w": 496,
-          "h": 600,
-          "alt": "Fotka z turnaje 2026 (foto: Jirka)",
-          "by": "Jirka"
-        },
-        {
-          "file": "18.jpg",
-          "w": 600,
-          "h": 450,
-          "alt": "Fotka z turnaje 2026 (foto: Jirka)",
-          "by": "Jirka"
-        },
-        {
-          "file": "19.jpg",
-          "w": 496,
-          "h": 600,
-          "alt": "Fotka z turnaje 2026 (foto: Jirka)",
-          "by": "Jirka"
-        },
-        {
-          "file": "20.jpg",
-          "w": 600,
-          "h": 450,
-          "alt": "Fotka z turnaje 2026 (foto: Jirka)",
-          "by": "Jirka"
-        }
-      ]
-    },
-    {
-      "year": 2025,
-      "title": "",
-      "photos": [
-        {
-          "file": "01.jpg",
-          "w": 450,
-          "h": 600,
-          "alt": "Fotka z turnaje 2025 (foto: Jirka)",
-          "by": "Jirka"
         }
       ]
     }
