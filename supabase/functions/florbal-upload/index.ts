@@ -193,10 +193,15 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405, origin);
   if (!origin || !ORIGINS.has(origin)) return json({ error: "origin" }, 403, origin);
 
+  const t0 = Date.now();
+  const timing: Record<string, number> = {};
+  const mark = (k: string) => { timing[k] = Date.now() - t0; };
+
   try {
     if (!TOKEN || !CODE) throw new Error("Function is missing GITHUB_TOKEN or UPLOAD_CODE");
 
     const form = await req.formData();
+    mark("form");
     if (!(await sameSecret(String(form.get("code") ?? ""), CODE))) throw new HttpError(401, "bad_code");
 
     const year = Number(form.get("year"));
@@ -214,6 +219,7 @@ Deno.serve(async (req) => {
       }))),
       readState(),
     ]);
+    mark("state");
 
     let state = firstState;
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -255,17 +261,23 @@ Deno.serve(async (req) => {
           fileChanges: { additions },
         },
       });
+      mark(`commit${attempt}`);
       const oid: string | undefined = r.data?.createCommitOnBranch?.commit?.oid;
       if (oid) {
         if (batch === 0) {
-          await notify(
+          // Upozornění až po odpovědi, ať na něj uživatel nečeká
+          const p = notify(
             `📸 Nové fotky – ${year}`,
             `${by || "Někdo"} nahrává ${total} ${total === 1 ? "fotku" : total < 5 ? "fotky" : "fotek"} do ročníku ${year}.`,
             `https://raw.githubusercontent.com/${REPO}/${oid}/img/${year}/nahledy/${added[0]}`,
             `https://github.com/${REPO}/commit/${oid}`,
           );
+          // deno-lint-ignore no-explicit-any
+          const rt = (globalThis as any).EdgeRuntime;
+          if (rt?.waitUntil) rt.waitUntil(p); else await p;
         }
-        return json({ ok: true, added: added.length, files: added }, 200, origin);
+        console.log(JSON.stringify({ upload: added.length, timing }));
+        return json({ ok: true, added: added.length, files: added, timing }, 200, origin);
       }
 
       // Někdo jiný commitnul mezitím: načíst nový stav a zkusit znovu

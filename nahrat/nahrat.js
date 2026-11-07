@@ -152,14 +152,18 @@
       })).then(function (list) { return list.filter(Boolean); });
     }
 
-    var batchNo = 0;
+    var batchNo = 0, timings = [], tStart = Date.now(), tWait = tStart;
     var nextPrep = prepSlice(slices[0]);
     var chain = Promise.resolve();
     slices.forEach(function (slice, k) {
-      chain = chain.then(function () { return nextPrep; }).then(function (prepared) {
+      chain = chain.then(function () { tWait = Date.now(); return nextPrep; }).then(function (prepared) {
         if (k + 1 < slices.length) nextPrep = prepSlice(slices[k + 1]);
         if (!prepared.length) return;
-        return upload(prepared, code, year, name, batchNo++, total).then(function (res) { sent += res.added || prepared.length; });
+        var tUp = Date.now();
+        return upload(prepared, code, year, name, batchNo++, total).then(function (res) {
+          sent += res.added || prepared.length;
+          timings.push({ photos: prepared.length, waitPrepMs: tUp - tWait, uploadMs: Date.now() - tUp, server: res.timing });
+        });
       }).then(function () {
         done += slice.length;
         progress(done, total);
@@ -176,6 +180,15 @@
       var link = document.createElement('a');
       link.href = '../galerie.html'; link.textContent = ' Otevřít galerii →';
       if (sent) statusEl.append(link);
+      var report = { totalMs: Date.now() - tStart, batches: timings };
+      if (window.console) console.log('upload timing', JSON.stringify(report));
+      if (/[?&]debug\b/.test(location.search)) {
+        var pre = document.createElement('pre');
+        pre.className = 'hint';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.textContent = JSON.stringify(report);
+        statusEl.append(pre);
+      }
     }, function (err) {
       progress(0, 0);
       var msg = errorText(err);
