@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galerie – Florbalový turnaj Jívová</title>
+  <meta name="description" content="Fotografie z florbalového turnaje v Jívové.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html">Florbal <span>Jívová</span></a>
+      <ul class="nav">
+        <li><a href="index.html">Úvod</a></li>
+        <li><a href="novinky.html">Novinky</a></li>
+        <li><a href="historie.html">Historie</a></li>
+        <li><a href="galerie.html" aria-current="page">Galerie</a></li>
+        <li><a href="kontakt.html">Kontakt</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <h1>Galerie</h1>
+      <p class="lead">Fotky z jednotlivých ročníků. Kliknutím fotku zvětšíte.</p>
+
+      <!--
+        JAK PŘIDAT FOTKY
+        1. Fotky dejte do složky img/2026/ (zmenšené na cca 1600 px na delší straně).
+        2. Každou "placeholder" dlaždici nahraďte řádkem:
+           <a href="img/2026/01.jpg"><img src="img/2026/01.jpg" alt="Popis fotky" loading="lazy"></a>
+        Zvětšování po kliknutí funguje automaticky.
+      -->
+
+      <section class="album">
+        <h2>2026</h2>
+        <div class="gallery">
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+        </div>
+      </section>
+
+      <section class="album">
+        <h2>2025</h2>
+        <div class="gallery">
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+          <div class="placeholder">Foto</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="close" aria-label="Zavřít">×</button>
+    <button class="prev" aria-label="Předchozí">‹</button>
+    <img alt="">
+    <button class="next" aria-label="Další">›</button>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>© 2026 Florbalový turnaj Jívová</span>
+      <a href="https://www.jirisestak.com">jirisestak.com</a>
+    </div>
+  </footer>
+
+  <script>
+    // Jednoduchá prohlížečka fotek
+    (function () {
+      const links = Array.from(document.querySelectorAll('.gallery a'));
+      const box = document.getElementById('lightbox');
+      const img = box.querySelector('img');
+      let i = 0;
+
+      function show(n) {
+        i = (n + links.length) % links.length;
+        img.src = links[i].href;
+        img.alt = links[i].querySelector('img')?.alt || '';
+        box.classList.add('open');
+        box.setAttribute('aria-hidden', 'false');
+      }
+      function close() {
+        box.classList.remove('open');
+        box.setAttribute('aria-hidden', 'true');
+      }
+
+      links.forEach((a, n) => a.addEventListener('click', e => { e.preventDefault(); show(n); }));
+      box.querySelector('.close').addEventListener('click', close);
+      box.querySelector('.prev').addEventListener('click', () => show(i - 1));
+      box.querySelector('.next').addEventListener('click', () => show(i + 1));
+      box.addEventListener('click', e => { if (e.target === box) close(); });
+      document.addEventListener('keydown', e => {
+        if (!box.classList.contains('open')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft') show(i - 1);
+        if (e.key === 'ArrowRight') show(i + 1);
+      });
+    })();
+  </script>
+</body>
+</html>

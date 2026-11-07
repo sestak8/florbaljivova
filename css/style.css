@@ -1,0 +1,269 @@
+/* Florbalový turnaj Jívová – sdílené styly */
+
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --text: #1c1c1e;
+  --muted: #6b6b70;
+  --line: #e4e4e2;
+  --accent: #2456d6;
+  --accent-soft: #e8eefc;
+  --radius: 12px;
+  --max: 960px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141416;
+    --surface: #1c1c1f;
+    --text: #ececef;
+    --muted: #9a9aa2;
+    --line: #2a2a2e;
+    --accent: #7aa2ff;
+    --accent-soft: #1f2a44;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  font-size: 17px;
+}
+
+img { max-width: 100%; display: block; }
+a { color: var(--accent); }
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ---------- Hlavička a navigace ---------- */
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.logo {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.logo span { color: var(--accent); }
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.nav a:hover { color: var(--text); }
+.nav a[aria-current="page"] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* ---------- Obsah ---------- */
+
+main { padding: 56px 0 80px; }
+
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.02em; }
+h1 { font-size: clamp(2rem, 5vw, 2.75rem); margin: 0 0 12px; }
+h2 { font-size: 1.5rem; margin: 48px 0 16px; }
+h3 { font-size: 1.125rem; margin: 0 0 6px; }
+
+.lead { color: var(--muted); font-size: 1.15rem; margin: 0 0 32px; max-width: 640px; }
+
+/* Úvodní blok */
+.hero { padding: 24px 0 16px; }
+.hero .badge {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 32px 0 0;
+}
+.fact {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.fact dt { color: var(--muted); font-size: 0.85rem; }
+.fact dd { margin: 2px 0 0; font-weight: 600; }
+
+.btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 999px;
+  margin-top: 28px;
+}
+@media (prefers-color-scheme: dark) { .btn { color: #0b1020; } }
+.btn:hover { opacity: 0.9; }
+
+/* Novinky */
+.news { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.news li { padding: 24px 0; border-bottom: 1px solid var(--line); }
+.news time { color: var(--muted); font-size: 0.875rem; display: block; margin-bottom: 4px; }
+.news p { margin: 6px 0 0; }
+
+/* Historie – časová osa */
+.timeline { list-style: none; padding: 0; margin: 0; }
+.timeline li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.timeline .year { font-weight: 700; color: var(--accent); font-size: 1.125rem; }
+.timeline p { margin: 4px 0 0; color: var(--muted); }
+
+table.results {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.table-scroll { overflow-x: auto; }
+table.results th, table.results td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+table.results th { color: var(--muted); font-weight: 500; }
+
+/* Galerie */
+.album { margin-bottom: 48px; }
+.album h2 { margin-top: 0; }
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.gallery a, .gallery .placeholder {
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--accent-soft);
+}
+.gallery img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s; }
+.gallery a:hover img { transform: scale(1.03); }
+.gallery .placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-height: 90vh; border-radius: 6px; }
+.lightbox button {
+  position: absolute;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 12px 16px;
+}
+.lightbox .close { top: 8px; right: 8px; }
+.lightbox .prev { left: 4px; top: 50%; transform: translateY(-50%); }
+.lightbox .next { right: 4px; top: 50%; transform: translateY(-50%); }
+
+/* Kontakt */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.card p { margin: 4px 0 0; color: var(--muted); }
+.card a { font-weight: 500; }
+
+.map {
+  margin-top: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.map iframe { width: 100%; height: 320px; border: 0; display: block; }
+
+/* ---------- Patička ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.875rem;
+  padding: 24px 0;
+}
+.site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+.site-footer a { color: var(--muted); }
