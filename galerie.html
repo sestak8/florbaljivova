@@ -7,7 +7,7 @@
   <meta name="description" content="Fotografie z florbalového turnaje v Jívové.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -23,11 +23,16 @@
       </ul>
     </div>
   </header>
+  <div class="stripe"></div>
 
   <main>
+    <section class="page-head">
+      <div class="wrap">
+        <h1>Galerie</h1>
+        <p class="lead">Fotky z jednotlivých ročníků. Kliknutím fotku zvětšíte.</p>
+      </div>
+    </section>
     <div class="wrap">
-      <h1>Galerie</h1>
-      <p class="lead">Fotky z jednotlivých ročníků. Kliknutím fotku zvětšíte.</p>
 
       <!--
         Seznam fotek je v img/galerie.json (ročníky, soubory, popisky).
@@ -45,6 +50,7 @@
     <button class="next" aria-label="Další">›</button>
   </div>
 
+  <div class="stripe"></div>
   <footer class="site-footer">
     <div class="wrap">
       <span>© 2026 Florbalový turnaj Jívová</span>
