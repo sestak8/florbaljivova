@@ -121,7 +121,7 @@ h3 { font-size: 1.125rem; margin: 0 0 6px; }
 
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin: 32px 0 0;
 }
@@ -131,8 +131,11 @@ h3 { font-size: 1.125rem; margin: 0 0 6px; }
   border-radius: var(--radius);
   padding: 16px 18px;
 }
+@media (max-width: 640px) { .facts { grid-template-columns: repeat(2, 1fr); } }
 .fact dt { color: var(--muted); font-size: 0.85rem; }
 .fact dd { margin: 2px 0 0; font-weight: 600; }
+
+.note { color: var(--muted); margin: 16px 0 0; }
 
 .btn {
   display: inline-block;
