@@ -3,7 +3,7 @@
   'use strict';
 
   var FUNCTION_URL = 'https://zwbaziqhcgikylvqmqrf.supabase.co/functions/v1/florbal-upload';
-  var LARGE = 1600, THUMB = 600, BATCH = 4, MAX_FILES = 50;
+  var LARGE = 1600, THUMB = 600, BATCH = 6, MAX_FILES = 50;
 
   var $ = function (id) { return document.getElementById(id); };
   var form = $('form'), statusEl = $('status'), bar = $('bar'), send = $('send');
@@ -143,28 +143,33 @@
     status('Připravuji fotky… 0 z ' + total);
     progress(0, total);
 
-    var chain = Promise.resolve(), batchNo = 0;
-    for (var i = 0; i < files.length; i += BATCH) {
-      (function (slice) {
-        chain = chain.then(function () {
-          return Promise.all(slice.map(function (f) {
-            return prepare(f).catch(function () { skipped++; return null; });
-          })).then(function (prepared) {
-            prepared = prepared.filter(Boolean);
-            if (!prepared.length) return;
-            return upload(prepared, code, year, name, batchNo++, total).then(function (res) { sent += res.added || prepared.length; });
-          }).then(function () {
-            done += slice.length;
-            progress(done, total);
-            status('Nahrávám… ' + done + ' z ' + total);
-          });
-        });
-      })(files.slice(i, i + BATCH));
+    // Dávky: zatímco se jedna odesílá, další se už zmenšuje
+    var slices = [];
+    for (var i = 0; i < files.length; i += BATCH) slices.push(files.slice(i, i + BATCH));
+    function prepSlice(slice) {
+      return Promise.all(slice.map(function (f) {
+        return prepare(f).catch(function () { skipped++; return null; });
+      })).then(function (list) { return list.filter(Boolean); });
     }
+
+    var batchNo = 0;
+    var nextPrep = prepSlice(slices[0]);
+    var chain = Promise.resolve();
+    slices.forEach(function (slice, k) {
+      chain = chain.then(function () { return nextPrep; }).then(function (prepared) {
+        if (k + 1 < slices.length) nextPrep = prepSlice(slices[k + 1]);
+        if (!prepared.length) return;
+        return upload(prepared, code, year, name, batchNo++, total).then(function (res) { sent += res.added || prepared.length; });
+      }).then(function () {
+        done += slice.length;
+        progress(done, total);
+        status('Nahrávám… ' + done + ' z ' + total);
+      });
+    });
 
     chain.then(function () {
       progress(0, 0);
-      var msg = sent ? 'Hotovo! Nahráno ' + sent + ' fotek. V galerii se objeví asi za minutu.' : 'Žádná fotka se nenahrála.';
+      var msg = sent ? 'Hotovo! Nahráno ' + sent + ' fotek. V galerii se objeví do 1–2 minut (web se po nahrání znovu sestavuje).' : 'Žádná fotka se nenahrála.';
       if (skipped) msg += ' ' + skipped + ' souborů se nepodařilo otevřít (nejsou to fotky?).';
       status(msg, sent ? 'ok' : 'error');
       if (sent) { $('files').value = ''; $('previews').textContent = ''; }
