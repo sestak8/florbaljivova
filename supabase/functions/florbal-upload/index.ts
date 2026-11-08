@@ -275,7 +275,7 @@ Deno.serve(async (req) => {
       const oid: string | undefined = r.data?.createCommitOnBranch?.commit?.oid;
       if (oid) {
         if (batch === 0) {
-                    const p = notify(
+          const p = notify(
             `📸 Nové fotky – ${year}`,
             `${by || "Někdo"} nahrává ${total} ${total === 1 ? "fotku" : total < 5 ? "fotky" : "fotek"} do ročníku ${year}.`,
             `https://raw.githubusercontent.com/${REPO}/${oid}/img/${year}/nahledy/${added[0]}`,
