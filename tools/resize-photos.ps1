@@ -1,6 +1,6 @@
 # Zmenší fotky pro web a vytvoří náhledy.
 # Použití: .\resize-photos.ps1 -Source "C:\...\florbal 2026" -Year 2026
-# Výstup:  florbaljivova\img\<rok>\NN.jpg (1600 px) a florbaljivova\img\<rok>\nahledy\NN.jpg (600 px)
+# Výstup:  img\<rok>\NN.jpg (1600 px) a img\<rok>\nahledy\NN.jpg (600 px)
 # Metadata (EXIF vč. GPS polohy) se při převodu odstraní.
 
 param(
