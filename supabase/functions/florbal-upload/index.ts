@@ -6,6 +6,7 @@
 //   UPLOAD_CODE    kód, který zadávají lidé při nahrávání
 //   NTFY_TOPIC     tajný název ntfy kanálu pro upozornění (nepovinné)
 //   NTFY_TOKEN     přístupový token z účtu na ntfy.sh (nepovinné, ale bez něj hrozí denní limit)
+//   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID  upozornění přes Telegram (nepovinné; když jsou, ntfy se nepoužije)
 //   GITHUB_BRANCH  větev (výchozí "main"; pro test např. "upload-test")
 //   EXTRA_ORIGIN   další povolený původ pro testování (nepovinné)
 //
@@ -22,6 +23,9 @@ const CODE = Deno.env.get("UPLOAD_CODE") ?? "";
 const NTFY_TOPIC = Deno.env.get("NTFY_TOPIC") ?? "";
 // Přístupový token z účtu na ntfy.sh: limity se pak počítají na účet, ne na sdílenou IP Supabase
 const NTFY_TOKEN = Deno.env.get("NTFY_TOKEN") ?? "";
+// Telegram bot (spolehlivější než ntfy): token od @BotFather a ID chatu
+const TG_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") ?? "";
+const TG_CHAT = Deno.env.get("TELEGRAM_CHAT_ID") ?? "";
 const SITE = "https://www.florbaljivova.cz";
 
 const ORIGINS = new Set(
@@ -166,6 +170,40 @@ type Year = { year: number; title?: string; photos: Photo[] };
 // ---------- Upozornění ----------
 
 async function notify(title: string, message: string, attach?: string, commitUrl?: string) {
+  if (TG_TOKEN && TG_CHAT) return notifyTelegram(title, message, attach, commitUrl);
+  return notifyNtfy(title, message, attach, commitUrl);
+}
+
+async function notifyTelegram(title: string, message: string, photo?: string, commitUrl?: string) {
+  const api = `https://api.telegram.org/bot${TG_TOKEN}`;
+  const text = `${title}\n${message}`;
+  const reply_markup = {
+    inline_keyboard: [
+      [{ text: "Galerie", url: `${SITE}/galerie.html` }],
+      ...(commitUrl ? [[{ text: "Commit", url: commitUrl }]] : []),
+      [{ text: "Vypnout nahrávání", url: `https://github.com/${REPO}/edit/${BRANCH}/upload-settings.json` }],
+    ],
+  };
+  const attempts: [string, Record<string, unknown>][] = [
+    ...(photo ? [["sendPhoto", { chat_id: TG_CHAT, photo, caption: text, reply_markup }] as [string, Record<string, unknown>]] : []),
+    ["sendMessage", { chat_id: TG_CHAT, text, reply_markup }],
+  ];
+  for (const [method, body] of attempts) {
+    try {
+      const r = await fetch(`${api}/${method}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (r.ok) { console.log(`telegram: odesláno (${method})`); return; }
+      console.error(`telegram: chyba ${r.status} (${method}): ${(await r.text()).slice(0, 300)}`);
+    } catch (e) {
+      console.error(`telegram: síťová chyba: ${(e as Error)?.message ?? e}`);
+    }
+  }
+}
+
+async function notifyNtfy(title: string, message: string, attach?: string, commitUrl?: string) {
   if (!NTFY_TOPIC) { console.log("ntfy: NTFY_TOPIC není nastavený, upozornění se neposílá"); return; }
   const full = {
     topic: NTFY_TOPIC,
@@ -194,7 +232,7 @@ async function notify(title: string, message: string, attach?: string, commitUrl
       });
       const text = (await r.text()).slice(0, 300);
       if (r.ok) { console.log(`ntfy: odesláno (${r.status})`); return; }
-      console.error(`ntfy: chyba ${r.status}: ${text}`);
+      console.error(`ntfy: chyba ${r.status} (token ${NTFY_TOKEN ? "ano" : "ne"}): ${text}`);
     } catch (e) {
       console.error(`ntfy: síťová chyba: ${(e as Error)?.message ?? e}`);
     }
