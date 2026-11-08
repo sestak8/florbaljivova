@@ -92,7 +92,10 @@ a { color: var(--accent); }
   color: var(--on-dark);
   text-decoration: none;
 }
-.logo span { color: var(--yellow); }
+.logo { display: inline-flex; align-items: center; gap: 10px; }
+.logo img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35)); transition: transform .15s; }
+.logo:hover img { transform: scale(1.06); }
+.logo-text span { color: var(--yellow); }
 
 .nav {
   display: flex;
@@ -257,6 +260,33 @@ h3 { font-size: 1.1rem; margin: 0 0 6px; letter-spacing: -0.01em; }
   text-transform: uppercase;
 }
 .fact dd small { display: block; font-family: var(--body); text-transform: none; font-size: 0.9rem; font-weight: 500; color: var(--muted); }
+
+/* ---------- Informace o turnaji (jeden blok) ---------- */
+
+.info {
+  margin-top: 40px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.info dl { margin: 0; padding: 8px 28px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; }
+.info dl > div {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+.info dl > div:nth-last-child(-n+2) { border-bottom: 0; }
+.info dt { color: var(--muted); font-size: 0.92rem; }
+.info dd { margin: 0; font-weight: 600; }
+@media (max-width: 760px) {
+  .info dl { grid-template-columns: 1fr; padding: 4px 20px; }
+  .info dl > div:nth-last-child(2) { border-bottom: 1px solid var(--line); }
+  .info dl > div { grid-template-columns: 1fr; gap: 0; padding: 12px 0; }
+}
 
 /* ---------- 20 let ---------- */
 
