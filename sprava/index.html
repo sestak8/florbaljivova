@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Správa galerie – Florbalový turnaj Jívová</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="sprava.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="../index.html" aria-label="Florbalový turnaj Jívová – úvodní stránka"><img src="../img/znak-jivova.png" alt="" width="34" height="40"><span class="logo-text">Florbal <span>Jívová</span></span></a>
+    </div>
+  </header>
+  <div class="stripe"></div>
+
+  <main>
+    <section class="page-head">
+      <div class="wrap">
+        <h1>Správa galerie</h1>
+        <p class="lead">Mažte fotky, měňte jejich pořadí a popisky. Změny se uloží až tlačítkem <strong>Uložit změny</strong>.</p>
+      </div>
+    </section>
+    <div class="wrap">
+
+      <form id="login" class="login">
+        <label for="code">Heslo pro správu</label>
+        <input id="code" type="password" autocomplete="current-password" required>
+        <label class="check"><input id="remember" type="checkbox"> Zapamatovat na tomto zařízení</label>
+        <button class="btn btn-blue" type="submit">Přihlásit</button>
+      </form>
+
+      <p id="status" class="box" hidden></p>
+
+      <div id="app" hidden>
+        <div class="toolbar">
+          <div class="upl">
+            <span>Nahrávání fotek: <strong id="uplState">…</strong></span>
+            <button id="uplToggle" class="btn btn-small" type="button">…</button>
+          </div>
+          <button id="logout" class="linkbtn" type="button">Odhlásit</button>
+        </div>
+
+        <label for="year">Ročník</label>
+        <select id="year"></select>
+
+        <label for="title">Nadpis ročníku <span class="opt">(např. „19. ročník, 28. 3. 2026“)</span></label>
+        <input id="title" type="text" maxlength="80">
+
+        <p class="hint" id="count"></p>
+        <div id="grid" class="grid"></div>
+
+        <div class="savebar" id="savebar" hidden>
+          <span id="changes"></span>
+          <button id="discard" class="linkbtn" type="button">Zahodit</button>
+          <button id="save" class="btn btn-blue" type="button">Uložit změny</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="sprava.js"></script>
+</body>
+</html>
