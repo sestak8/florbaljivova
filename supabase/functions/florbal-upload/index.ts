@@ -4,6 +4,7 @@
 // Secrets (supabase secrets set …):
 //   GITHUB_TOKEN   fine-grained token, jen repo florbaljivova, Contents: read & write
 //   UPLOAD_CODE    kód, který zadávají lidé při nahrávání
+//   ADMIN_CODE     heslo pro správu galerie na florbaljivova.cz/sprava/ (bez něj je správa vypnutá)
 //   NTFY_TOPIC     tajný název ntfy kanálu pro upozornění (nepovinné)
 //   NTFY_TOKEN     přístupový token z účtu na ntfy.sh (nepovinné, ale bez něj hrozí denní limit)
 //   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID  upozornění přes Telegram (nepovinné; když jsou, ntfy se nepoužije)
@@ -20,6 +21,7 @@ const [OWNER, NAME] = REPO.split("/");
 const BRANCH = Deno.env.get("GITHUB_BRANCH") ?? "main";
 const TOKEN = Deno.env.get("GITHUB_TOKEN") ?? "";
 const CODE = Deno.env.get("UPLOAD_CODE") ?? "";
+const ADMIN_CODE = Deno.env.get("ADMIN_CODE") ?? "";
 const NTFY_TOPIC = Deno.env.get("NTFY_TOPIC") ?? "";
 // Přístupový token z účtu na ntfy.sh: limity se pak počítají na účet, ne na sdílenou IP Supabase
 const NTFY_TOKEN = Deno.env.get("NTFY_TOKEN") ?? "";
@@ -239,6 +241,111 @@ async function notifyNtfy(title: string, message: string, attach?: string, commi
   }
 }
 
+// ---------- Správa galerie (/sprava/) ----------
+//
+// JSON požadavky s heslem ADMIN_CODE:
+//   { action: "list" }                              → aktuální galerie a nastavení přímo z GitHubu
+//   { action: "save", year, title, known, photos }  → uloží pořadí, popisky a smazání v jednom ročníku
+//        known  = soubory, které správce viděl (smaže se jen to, co v known je a v photos není;
+//                 fotky nahrané mezitím zůstanou a přidají se na konec)
+//        photos = [{ file, alt }] v novém pořadí
+//   { action: "settings", enabled }                 → zapne/vypne nahrávání
+
+function cleanText(s: unknown, max: number): string {
+  return String(s ?? "").replace(/[\u0000-\u001f\u007f<>]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
+}
+
+async function commitFiles(head: string, headline: string, additions: { path: string; contents: string }[], deletions: { path: string }[] = []) {
+  const r = await graphql(COMMIT_MUTATION, {
+    input: {
+      branch: { repositoryNameWithOwner: REPO, branchName: BRANCH },
+      message: { headline },
+      expectedHeadOid: head,
+      fileChanges: { additions, ...(deletions.length ? { deletions } : {}) },
+    },
+  });
+  const oid: string | undefined = r.data?.createCommitOnBranch?.commit?.oid;
+  const msg = r.errors?.map((e) => e.message).join("; ") ?? "";
+  return { oid, stale: !oid && /expected|stale|head/i.test(msg), msg };
+}
+
+async function handleAdmin(body: any, origin: string | null): Promise<Response> {
+  if (!ADMIN_CODE) throw new HttpError(403, "admin_off");
+  if (!(await sameSecret(String(body?.code ?? ""), ADMIN_CODE))) {
+    await new Promise((res) => setTimeout(res, 800)); // zpomalit hádání hesla
+    throw new HttpError(401, "bad_code");
+  }
+  const action = String(body.action ?? "");
+
+  if (action === "list") {
+    const st = await readState();
+    return json({
+      ok: true,
+      head: st.head,
+      repo: REPO,
+      years: (st.manifestText ? JSON.parse(st.manifestText) : { years: [] }).years,
+      settings: st.settingsText ? JSON.parse(st.settingsText) : { enabled: false },
+    }, 200, origin);
+  }
+
+  if (action === "settings") {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const st = await readState();
+      const settings = st.settingsText ? JSON.parse(st.settingsText) : {};
+      settings.enabled = !!body.enabled;
+      const r = await commitFiles(st.head, `Nahrávání fotek: ${settings.enabled ? "zapnuto" : "vypnuto"}`,
+        [{ path: "upload-settings.json", contents: b64utf8(JSON.stringify(settings, null, 2) + "\n") }]);
+      if (r.oid) return json({ ok: true, settings }, 200, origin);
+      if (!r.stale) throw new Error(`GitHub commit: ${r.msg}`);
+    }
+    throw new HttpError(503, "busy");
+  }
+
+  if (action === "save") {
+    const year = Number(body.year);
+    if (!Number.isInteger(year)) throw new HttpError(400, "bad_year");
+    const known = new Set<string>((Array.isArray(body.known) ? body.known : []).map(String));
+    const wanted: { file: string; alt: string }[] = (Array.isArray(body.photos) ? body.photos : [])
+      .map((p: any) => ({ file: String(p?.file ?? ""), alt: cleanText(p?.alt, 200) }));
+
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const st = await readState();
+      const manifest: { years: Year[] } = st.manifestText ? JSON.parse(st.manifestText) : { years: [] };
+      const entry = manifest.years.find((y) => y.year === year);
+      if (!entry) throw new HttpError(404, "bad_year");
+
+      const current = new Map(entry.photos.map((p) => [p.file, p]));
+      const seen = new Set<string>();
+      const photos: Photo[] = [];
+      for (const w of wanted) {
+        const p = current.get(w.file);
+        if (!p || seen.has(w.file)) continue; // neznámé nebo zdvojené soubory se ignorují
+        seen.add(w.file);
+        photos.push({ ...p, alt: w.alt || undefined }); // prázdný popisek → výchozí text v galerii
+      }
+      // Fotky nahrané mezitím (správce je neviděl) zůstanou na konci
+      for (const p of entry.photos) if (!known.has(p.file) && !seen.has(p.file)) { seen.add(p.file); photos.push(p); }
+      const removed = entry.photos.filter((p) => !seen.has(p.file)).map((p) => p.file);
+
+      entry.photos = photos;
+      if (body.title !== undefined) entry.title = cleanText(body.title, 80);
+
+      const additions = [{ path: "img/galerie.json", contents: b64utf8(JSON.stringify(manifest, null, 2) + "\n") }];
+      const deletions = removed.flatMap((f) => [{ path: `img/${year}/${f}` }, { path: `img/${year}/nahledy/${f}` }]);
+      const headline = `Galerie ${year}: úpravy` + (removed.length ? ` (smazáno ${removed.length})` : "");
+
+      let r = await commitFiles(st.head, headline, additions, deletions);
+      // Když některý soubor fyzicky neexistuje, aspoň skrýt fotky z galerie
+      if (!r.oid && !r.stale && deletions.length) r = await commitFiles(st.head, headline, additions);
+      if (r.oid) return json({ ok: true, removed: removed.length, photos: photos.length }, 200, origin);
+      if (!r.stale) throw new Error(`GitHub commit: ${r.msg}`);
+    }
+    throw new HttpError(503, "busy");
+  }
+
+  throw new HttpError(400, "bad_action");
+}
+
 // ---------- Hlavní obsluha ----------
 
 Deno.serve(async (req) => {
@@ -253,6 +360,11 @@ Deno.serve(async (req) => {
 
   try {
     if (!TOKEN || !CODE) throw new Error("Function is missing GITHUB_TOKEN or UPLOAD_CODE");
+
+    // Správa galerie posílá JSON, nahrávání posílá formulář
+    if ((req.headers.get("Content-Type") ?? "").startsWith("application/json")) {
+      return await handleAdmin(await req.json().catch(() => ({})), origin);
+    }
 
     const form = await req.formData();
     mark("form");
