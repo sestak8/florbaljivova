@@ -12,7 +12,7 @@ param(
 
 Add-Type -AssemblyName System.Drawing
 
-$site = Join-Path $PSScriptRoot '..\florbaljivova'
+$site = Join-Path $PSScriptRoot '..'
 $outDir = Join-Path $site "img\$Year"
 $thumbDir = Join-Path $outDir 'nahledy'
 New-Item -ItemType Directory -Force -Path $thumbDir | Out-Null
