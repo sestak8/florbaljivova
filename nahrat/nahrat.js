@@ -173,7 +173,7 @@
 
     chain.then(function () {
       progress(0, 0);
-      var msg = sent ? 'Hotovo! Nahráno ' + sent + ' fotek. V galerii se objeví do 1–2 minut (web se po nahrání znovu sestavuje).' : 'Žádná fotka se nenahrála.';
+      var msg = sent ? 'Hotovo! Nahráno ' + sent + ' ' + (sent === 1 ? 'fotka' : sent < 5 ? 'fotky' : 'fotek') + '. Nahrání fotek může pár minut trvat. Pokud se vaše fotky neobjeví v galerii, počkejte a poté znovu načtěte stránku.' : 'Žádná fotka se nenahrála.';
       if (skipped) msg += ' ' + skipped + ' souborů se nepodařilo otevřít (nejsou to fotky?).';
       status(msg, sent ? 'ok' : 'error');
       if (sent) { $('files').value = ''; $('previews').textContent = ''; }

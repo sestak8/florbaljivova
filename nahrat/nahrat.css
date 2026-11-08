@@ -12,7 +12,9 @@ form input[type=text], form input[type=password], form select {
 }
 form input[type=file] { font: inherit; }
 .hint { color: var(--muted); font-size: 0.875rem; margin: 6px 0 0; }
-form .btn { border: 0; cursor: pointer; font: inherit; font-weight: 600; align-self: flex-start; }
+form .btn { border: 0; cursor: pointer; font: inherit; font-weight: 600; align-self: flex-start; margin-top: 24px; }
+.previews:empty { display: none; }
+@media (max-width: 600px) { form .btn { align-self: stretch; padding-top: 14px; padding-bottom: 14px; } }
 form .btn:disabled { opacity: 0.6; cursor: default; }
 
 .previews {
