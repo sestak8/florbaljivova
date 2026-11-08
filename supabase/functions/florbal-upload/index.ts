@@ -275,16 +275,14 @@ Deno.serve(async (req) => {
       const oid: string | undefined = r.data?.createCommitOnBranch?.commit?.oid;
       if (oid) {
         if (batch === 0) {
-          // Upozornění až po odpovědi, ať na něj uživatel nečeká
-          const p = notify(
+                    const p = notify(
             `📸 Nové fotky – ${year}`,
             `${by || "Někdo"} nahrává ${total} ${total === 1 ? "fotku" : total < 5 ? "fotky" : "fotek"} do ročníku ${year}.`,
             `https://raw.githubusercontent.com/${REPO}/${oid}/img/${year}/nahledy/${added[0]}`,
             `https://github.com/${REPO}/commit/${oid}`,
           );
-          // deno-lint-ignore no-explicit-any
-          const rt = (globalThis as any).EdgeRuntime;
-          if (rt?.waitUntil) rt.waitUntil(p); else await p;
+          // Počkat na odeslání (max. 5 s), ať ho běhové prostředí neukončí po odpovědi
+          await Promise.race([p, new Promise((res) => setTimeout(res, 5000))]);
         }
         console.log(JSON.stringify({ upload: added.length, timing }));
         return json({ ok: true, added: added.length, files: added, timing }, 200, origin);
