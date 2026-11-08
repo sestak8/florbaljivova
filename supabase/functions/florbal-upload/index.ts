@@ -163,26 +163,36 @@ type Year = { year: number; title?: string; photos: Photo[] };
 // ---------- Upozornění ----------
 
 async function notify(title: string, message: string, attach?: string, commitUrl?: string) {
-  if (!NTFY_TOPIC) return;
-  try {
-    await fetch("https://ntfy.sh/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        topic: NTFY_TOPIC,
-        title,
-        message,
-        tags: ["camera_flash"],
-        click: `${SITE}/galerie.html`,
-        ...(attach ? { attach } : {}),
-        actions: [
-          { action: "view", label: "Galerie", url: `${SITE}/galerie.html` },
-          ...(commitUrl ? [{ action: "view", label: "Commit", url: commitUrl }] : []),
-          { action: "view", label: "Vypnout nahrávání", url: `https://github.com/${REPO}/edit/${BRANCH}/upload-settings.json` },
-        ],
-      }),
-    });
-  } catch (_) { /* upozornění nesmí shodit nahrávání */ }
+  if (!NTFY_TOPIC) { console.log("ntfy: NTFY_TOPIC není nastavený, upozornění se neposílá"); return; }
+  const full = {
+    topic: NTFY_TOPIC,
+    title,
+    message,
+    tags: ["camera_flash"],
+    click: `${SITE}/galerie.html`,
+    ...(attach ? { attach } : {}),
+    actions: [
+      { action: "view", label: "Galerie", url: `${SITE}/galerie.html` },
+      ...(commitUrl ? [{ action: "view", label: "Commit", url: commitUrl }] : []),
+      { action: "view", label: "Vypnout nahrávání", url: `https://github.com/${REPO}/edit/${BRANCH}/upload-settings.json` },
+    ],
+  };
+  // Když ntfy odmítne plnou zprávu, zkusí se jednoduchá bez obrázku a tlačítek
+  const simple = { topic: NTFY_TOPIC, title, message, click: `${SITE}/galerie.html` };
+  for (const body of [full, simple]) {
+    try {
+      const r = await fetch("https://ntfy.sh/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const text = (await r.text()).slice(0, 300);
+      if (r.ok) { console.log(`ntfy: odesláno (${r.status})`); return; }
+      console.error(`ntfy: chyba ${r.status}: ${text}`);
+    } catch (e) {
+      console.error(`ntfy: síťová chyba: ${(e as Error)?.message ?? e}`);
+    }
+  }
 }
 
 // ---------- Hlavní obsluha ----------
