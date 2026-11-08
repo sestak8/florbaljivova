@@ -5,6 +5,7 @@
 //   GITHUB_TOKEN   fine-grained token, jen repo florbaljivova, Contents: read & write
 //   UPLOAD_CODE    kód, který zadávají lidé při nahrávání
 //   NTFY_TOPIC     tajný název ntfy kanálu pro upozornění (nepovinné)
+//   NTFY_TOKEN     přístupový token z účtu na ntfy.sh (nepovinné, ale bez něj hrozí denní limit)
 //   GITHUB_BRANCH  větev (výchozí "main"; pro test např. "upload-test")
 //   EXTRA_ORIGIN   další povolený původ pro testování (nepovinné)
 //
@@ -19,6 +20,8 @@ const BRANCH = Deno.env.get("GITHUB_BRANCH") ?? "main";
 const TOKEN = Deno.env.get("GITHUB_TOKEN") ?? "";
 const CODE = Deno.env.get("UPLOAD_CODE") ?? "";
 const NTFY_TOPIC = Deno.env.get("NTFY_TOPIC") ?? "";
+// Přístupový token z účtu na ntfy.sh: limity se pak počítají na účet, ne na sdílenou IP Supabase
+const NTFY_TOKEN = Deno.env.get("NTFY_TOKEN") ?? "";
 const SITE = "https://www.florbaljivova.cz";
 
 const ORIGINS = new Set(
@@ -183,7 +186,10 @@ async function notify(title: string, message: string, attach?: string, commitUrl
     try {
       const r = await fetch("https://ntfy.sh/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(NTFY_TOKEN ? { Authorization: `Bearer ${NTFY_TOKEN}` } : {}),
+        },
         body: JSON.stringify(body),
       });
       const text = (await r.text()).slice(0, 300);
